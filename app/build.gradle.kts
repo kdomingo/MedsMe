@@ -23,11 +23,11 @@ fun versionNameFrom(props: Properties): String =
     props.getProperty("VERSION_NAME") ?: "1.0.0"
 
 android {
-    namespace = "com.example.medtracker"
+    namespace = "com.domtech.medtracker"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.medtracker"
+        applicationId = "com.domtech.medtracker"
         minSdk = 26
         targetSdk = 35
         val versionProps = loadVersionProps(rootProject.rootDir)
