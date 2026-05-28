@@ -74,7 +74,8 @@ replay_pid*
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -238,5 +239,8 @@ fabric.properties
 ### AndroidStudio Patch ###
 
 !/gradle/wrapper/gradle-wrapper.jar
+
+# Project specific
+*.salive
 
 # End of https://www.toptal.com/developers/gitignore/api/android,androidstudio,gradle,kotlin,macos
