@@ -85,9 +85,9 @@
     <string name="time_minute">1 minute</string>
     <string name="time_minutes">%d minutes</string>
     <string name="time_less_than_minute">less than a minute</string>
-    <string name="time_separator_and"> and </string>
-    <string name="time_separator_comma">, </string>
-    <string name="time_separator_comma_and">, and </string>
+    <string name="time_separator_and">" and "</string>
+    <string name="time_separator_comma">", "</string>
+    <string name="time_separator_comma_and">", and "</string>
 
     <string name="next_dose_warning_prefix">Warning: Your next dose is not due for another %s. Taking it now may exceed your recommended dosage.</string>
 
