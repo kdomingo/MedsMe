@@ -1,0 +1,177 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp")
+}
+
+import java.util.Properties
+
+fun loadVersionProps(rootDir: File): Properties {
+    val props = Properties()
+    val f = File(rootDir, "version.properties")
+    if (f.exists()) {
+        f.inputStream().use(props::load)
+    }
+    return props
+}
+
+fun versionCodeFrom(props: Properties): Int =
+    props.getProperty("VERSION_CODE")?.toIntOrNull() ?: 1
+
+fun versionNameFrom(props: Properties): String =
+    props.getProperty("VERSION_NAME") ?: "1.0.0"
+
+android {
+    namespace = "com.example.medtracker"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.example.medtracker"
+        minSdk = 26
+        targetSdk = 35
+        val versionProps = loadVersionProps(rootProject.rootDir)
+        versionCode = versionCodeFrom(versionProps)
+        versionName = versionNameFrom(versionProps)
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+        debug {
+            isMinifyEnabled = false
+        }
+        create("staging") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+            matchingFallbacks += listOf("debug")
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        val versionProps = loadVersionProps(rootProject.rootDir)
+        val vName = versionNameFrom(versionProps)
+        val vCode = versionCodeFrom(versionProps)
+
+        variant.outputs.forEach { output ->
+            // Example: MedTracker-staging-v1.2.3(45).apk
+            val out = output as? com.android.build.api.variant.impl.VariantOutputImpl
+            if (out != null) {
+                out.outputFileName = "MedTracker-${variant.name}-v${vName}(${vCode}).apk"
+            }
+        }
+    }
+}
+
+val incrementVersionCode by tasks.registering {
+    group = "versioning"
+    description = "Increment VERSION_CODE in version.properties"
+
+    doLast {
+        val f = File(rootProject.rootDir, "version.properties")
+        val props = Properties()
+        if (f.exists()) {
+            f.inputStream().use(props::load)
+        }
+        val current = props.getProperty("VERSION_CODE")?.toIntOrNull() ?: 0
+        props["VERSION_CODE"] = (current + 1).toString()
+        if (!props.containsKey("VERSION_NAME")) {
+            props["VERSION_NAME"] = "1.0.0"
+        }
+        f.outputStream().use { out ->
+            props.store(out, "Auto-updated by Gradle")
+        }
+        logger.lifecycle("Bumped VERSION_CODE: $current -> ${current + 1}")
+    }
+}
+
+// Auto-increment when producing installable artifacts for staging/release.
+tasks.configureEach {
+    val n = name.lowercase()
+    val isAssembleOrBundle = n.startsWith("assemble") || n.startsWith("bundle")
+    val isStagingOrRelease = n.contains("staging") || n.contains("release")
+    if (isAssembleOrBundle && isStagingOrRelease) {
+        dependsOn(incrementVersionCode)
+    }
+}
+
+dependencies {
+    val composeBom = platform("androidx.compose:compose-bom:2025.01.00")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.0")
+    implementation("androidx.activity:activity-compose:1.10.1")
+
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.material3:material3:1.3.2")
+    implementation("androidx.compose.material:material-icons-extended")
+
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+
+    // MVVM
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.0")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
+    ksp("androidx.room:room-compiler:2.7.0")
+
+    // WorkManager (low stock checks)
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+
+    // Notifications
+    implementation("androidx.core:core-ktx:1.15.0")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("com.google.truth:truth:1.4.4")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:rules:1.6.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
