@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -119,7 +121,7 @@ private fun MedicationRow(
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -139,8 +141,8 @@ private fun MedicationRow(
                 }
                 if (low) {
                     Text(
-                        text = "LOW",
-                        style = MaterialTheme.typography.labelLarge,
+                        text = "LOW STOCK",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
@@ -162,32 +164,17 @@ internal fun LevelBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(10.dp)
-            .clip(shape),
+            .height(12.dp)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .clip(shape)
-                .padding(0.dp),
-        )
-        Box(
-            modifier = Modifier
                 .fillMaxWidth(fraction)
-                .height(10.dp)
-                .clip(shape),
-        ) {
-            androidx.compose.foundation.Canvas(Modifier.fillMaxSize()) {
-                drawRoundRect(color = color, cornerRadius = androidx.compose.ui.geometry.CornerRadius(999f, 999f))
-            }
-        }
-        androidx.compose.foundation.Canvas(Modifier.fillMaxSize()) {
-            drawRoundRect(
-                color = Color.Black.copy(alpha = 0.06f),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(999f, 999f),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f),
-            )
-        }
+                .height(12.dp)
+                .clip(shape)
+                .background(color),
+        )
     }
 }
 

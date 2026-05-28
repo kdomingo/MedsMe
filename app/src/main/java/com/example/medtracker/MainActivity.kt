@@ -10,6 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import com.example.medtracker.ui.AppNav
 import com.example.medtracker.ui.LocalRepository
+import com.example.medtracker.ui.theme.MedTrackerTheme
 import com.example.medtracker.util.EnsurePostNotificationsPermission
 
 class MainActivity : ComponentActivity() {
@@ -18,11 +19,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val app = (LocalContext.current.applicationContext as MedTrackerApplication)
-            CompositionLocalProvider(LocalRepository provides app.repo) {
-                EnsurePostNotificationsPermission()
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    AppNav()
+            MedTrackerTheme {
+                val app = (LocalContext.current.applicationContext as MedTrackerApplication)
+                CompositionLocalProvider(LocalRepository provides app.repo) {
+                    EnsurePostNotificationsPermission()
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        AppNav()
+                    }
                 }
             }
         }

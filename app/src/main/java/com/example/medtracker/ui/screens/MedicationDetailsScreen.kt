@@ -108,9 +108,9 @@ fun MedicationDetailsScreen(
         ) {
             val low = m.currentLevel <= m.lowLevelThreshold
             Text(
-                text = if (low) "Low stock" else "In stock",
+                text = if (low) "LOW STOCK ALERT" else "IN STOCK",
                 color = if (low) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
             )
 
             val maxForBar = (m.lowLevelThreshold.coerceAtLeast(1.0) * 2.0)
@@ -121,12 +121,19 @@ fun MedicationDetailsScreen(
             )
 
             Text(
-                text = "Level: ${m.currentLevel} • Low at ${m.lowLevelThreshold}",
+                text = "Current Level: ${m.currentLevel} ${m.doseUnit}s",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = "Restock threshold: ${m.lowLevelThreshold}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Take dose", style = MaterialTheme.typography.titleMedium)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -140,7 +147,7 @@ fun MedicationDetailsScreen(
                 }
             }
 
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Text("Reminders", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
@@ -216,7 +223,7 @@ fun MedicationDetailsScreen(
                 }
             }
 
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Recent intakes", style = MaterialTheme.typography.titleMedium)
                     if (recent.isEmpty()) {
@@ -237,7 +244,7 @@ fun MedicationDetailsScreen(
             }
 
             if (m.notes.isNotBlank()) {
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Notes", style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
@@ -253,13 +260,29 @@ fun MedicationDetailsScreen(
 private fun DaysPicker(mask: Int, onChange: (Int) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Days", style = MaterialTheme.typography.labelLarge)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Days.all.forEach { day ->
                 val selected = (mask and day.bit) != 0
-                OutlinedButton(
-                    onClick = { onChange(Days.toggle(mask, day.bit)) },
-                    content = { Text(day.shortLabel) },
-                )
+                if (selected) {
+                    Button(
+                        onClick = { onChange(Days.toggle(mask, day.bit)) },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    ) {
+                        Text(day.shortLabel, style = MaterialTheme.typography.labelSmall)
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = { onChange(Days.toggle(mask, day.bit)) },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    ) {
+                        Text(day.shortLabel, style = MaterialTheme.typography.labelSmall)
+                    }
+                }
             }
         }
     }
