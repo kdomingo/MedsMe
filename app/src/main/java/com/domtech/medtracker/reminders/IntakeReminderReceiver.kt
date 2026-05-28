@@ -6,6 +6,7 @@ import android.content.Intent
 import android.app.PendingIntent
 import androidx.core.app.TaskStackBuilder
 import com.domtech.medtracker.MainActivity
+import com.domtech.medtracker.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,8 +29,8 @@ class IntakeReminderReceiver : BroadcastReceiver() {
             context = context,
             channelId = NotificationHelper.CHANNEL_INTAKE_ID,
             notificationId = reminderId.toInt(),
-            title = "Time to take your medication",
-            text = "Tap to open MedTracker and log it.",
+            title = context.getString(R.string.notification_intake_title),
+            text = context.getString(R.string.notification_intake_text),
             contentIntent = contentIntent,
         )
 

@@ -1,4 +1,95 @@
 <resources>
     <string name="app_name">MedTracker</string>
-</resources>
 
+    <!-- Medication List -->
+    <string name="medications">Medications</string>
+    <string name="add_medication_desc">Add medication</string>
+    <string name="no_medications">No medications yet. Tap + to add one.</string>
+    <string name="take">Take</string>
+    <string name="low_stock">LOW STOCK</string>
+
+    <!-- Medication Details -->
+    <string name="medication">Medication</string>
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
+    <string name="not_found">Not found.</string>
+    <string name="low_stock_alert">LOW STOCK ALERT</string>
+    <string name="in_stock">IN STOCK</string>
+    <string name="current_level">Current Level: %s</string>
+    <string name="frequency_label">Frequency: %s</string>
+    <string name="restock_threshold_label">Restock threshold: %s</string>
+    <string name="dose_inventory">Dose &amp; Inventory</string>
+    <string name="take_dose">Take %s</string>
+    <string name="restock">Restock</string>
+    <string name="reminders">Reminders</string>
+    <string name="add">Add</string>
+    <string name="time_hh_mm">Time (HH:MM)</string>
+    <string name="save_reminder">Save reminder</string>
+    <string name="no_reminders">No reminders yet.</string>
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="delete">Delete</string>
+    <string name="recent_intakes">Recent intakes</string>
+    <string name="no_intake_history">No intake history yet.</string>
+    <string name="notes">Notes</string>
+    <string name="restock_title">Restock %s</string>
+    <string name="restock_prompt">How many %s are you adding?</string>
+    <string name="amount">Amount</string>
+    <string name="add_to_inventory">Add to Inventory</string>
+    <string name="days">Days</string>
+
+    <!-- Confirm Dose Dialog -->
+    <string name="confirm_dose">Confirm Dose</string>
+    <string name="early_dose_warning">Early Dose Warning</string>
+    <string name="confirm_dose_prompt">Are you taking %1$s of %2$s?</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Edit Medication -->
+    <string name="add_medication">Add medication</string>
+    <string name="edit_medication">Edit medication</string>
+    <string name="name">Name</string>
+    <string name="dose_amount">Dose amount</string>
+    <string name="unit_hint">Unit (e.g. tablet)</string>
+    <string name="frequency">Frequency</string>
+    <string name="every_x_hours">Every X hours</string>
+    <string name="every_x_days">Every X days</string>
+    <string name="current_level_inventory">Current level (inventory)</string>
+    <string name="low_level_threshold">Low level threshold</string>
+    <string name="save">Save</string>
+    <string name="inventory_tip">Tip: inventory decreases when you tap “Take dose”.</string>
+
+    <!-- Notifications -->
+    <string name="notification_intake_title">Time to take your medication</string>
+    <string name="notification_intake_text">Tap to open MedTracker and log it.</string>
+    <string name="notification_low_stock_title">Low medication stock</string>
+    <string name="notification_low_stock_more"> (+%d more)</string>
+    <string name="channel_reminders_name">Medication reminders</string>
+    <string name="channel_reminders_desc">Reminders to take medications</string>
+    <string name="channel_stock_name">Low stock alerts</string>
+    <string name="channel_stock_desc">Alerts when medication inventory is low</string>
+
+    <!-- Days & Intervals (for dynamic formatting) -->
+    <string name="freq_daily">Daily</string>
+    <string name="freq_hourly">Hourly</string>
+    <string name="daily">Daily</string>
+    <string name="every_day">Every day</string>
+    <string name="every_x_days_formatted">Every %d days</string>
+    <string name="every_hour">Every hour</string>
+    <string name="every_x_hours_formatted">Every %d hours</string>
+
+    <string name="time_day">1 day</string>
+    <string name="time_days">%d days</string>
+    <string name="time_hour">1 hour</string>
+    <string name="time_hours">%d hours</string>
+    <string name="time_minute">1 minute</string>
+    <string name="time_minutes">%d minutes</string>
+    <string name="time_less_than_minute">less than a minute</string>
+    <string name="time_separator_and"> and </string>
+    <string name="time_separator_comma">, </string>
+    <string name="time_separator_comma_and">, and </string>
+
+    <string name="next_dose_warning_prefix">Warning: Your next dose is not due for another %s. Taking it now may exceed your recommended dosage.</string>
+
+    <string name="none">None</string>
+</resources>

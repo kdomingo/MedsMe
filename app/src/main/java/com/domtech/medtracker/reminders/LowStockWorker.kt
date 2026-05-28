@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import androidx.core.app.TaskStackBuilder
 import com.domtech.medtracker.MainActivity
 import com.domtech.medtracker.MedTrackerApplication
+import com.domtech.medtracker.R
 
 class LowStockWorker(
     appContext: Context,
@@ -18,9 +19,9 @@ class LowStockWorker(
         val low = app.repo.listLowStock()
         if (low.isEmpty()) return Result.success()
 
-        val title = "Low medication stock"
+        val title = applicationContext.getString(R.string.notification_low_stock_title)
         val text = low.take(3).joinToString { "${it.name}: ${it.currentLevel}" } +
-            if (low.size > 3) " (+${low.size - 3} more)" else ""
+            if (low.size > 3) applicationContext.getString(R.string.notification_low_stock_more, low.size - 3) else ""
 
         val contentIntent = TaskStackBuilder.create(applicationContext).run {
             addNextIntent(Intent(applicationContext, MainActivity::class.java))

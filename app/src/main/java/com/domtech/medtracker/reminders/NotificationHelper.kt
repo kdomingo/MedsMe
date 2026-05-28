@@ -7,6 +7,8 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.domtech.medtracker.R
+
 object NotificationHelper {
     const val CHANNEL_INTAKE_ID = "intake_reminders"
     const val CHANNEL_STOCK_ID = "low_stock"
@@ -17,18 +19,18 @@ object NotificationHelper {
 
         val intake = NotificationChannel(
             CHANNEL_INTAKE_ID,
-            "Medication reminders",
+            context.getString(R.string.channel_reminders_name),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Reminders to take medications"
+            description = context.getString(R.string.channel_reminders_desc)
         }
 
         val stock = NotificationChannel(
             CHANNEL_STOCK_ID,
-            "Low stock alerts",
+            context.getString(R.string.channel_stock_name),
             NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
-            description = "Alerts when medication inventory is low"
+            description = context.getString(R.string.channel_stock_desc)
         }
 
         nm.createNotificationChannel(intake)

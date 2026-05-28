@@ -1,5 +1,8 @@
 package com.domtech.medtracker.ui.util
 
+import android.content.Context
+import com.domtech.medtracker.R
+
 object Days {
     data class Day(val bit: Int, val shortLabel: String, val fullLabel: String)
 
@@ -18,9 +21,9 @@ object Days {
 
     fun toggle(mask: Int, bit: Int): Int = mask xor bit
 
-    fun formatMask(mask: Int): String {
+    fun formatMask(context: Context, mask: Int): String {
         val selected = all.filter { (mask and it.bit) != 0 }.map { it.shortLabel }
-        return if (selected.isEmpty()) "None" else selected.joinToString(", ")
+        return if (selected.isEmpty()) context.getString(R.string.none) else selected.joinToString(", ")
     }
 }
 

@@ -1,5 +1,7 @@
 package com.domtech.medtracker.ui.util
 
+import android.content.Context
+import com.domtech.medtracker.R
 import com.domtech.medtracker.data.Frequency
 import com.domtech.medtracker.data.MedicationEntity
 import java.util.Locale
@@ -15,12 +17,17 @@ object FormatUtils {
         return "$amountStr $pluralUnit"
     }
 
-    fun formatFrequency(med: MedicationEntity): String {
+    fun formatFrequency(context: Context, med: MedicationEntity): String {
         return when (med.frequency) {
-            Frequency.DAILY -> "Daily"
+            Frequency.DAILY -> {
+                val interval = med.dailyInterval
+                if (interval <= 1) context.getString(R.string.daily) 
+                else context.getString(R.string.every_x_days_formatted, interval)
+            }
             Frequency.HOURLY -> {
                 val interval = med.hourlyInterval
-                if (interval <= 1) "Every hour" else "Every $interval hours"
+                if (interval <= 1) context.getString(R.string.every_hour) 
+                else context.getString(R.string.every_x_hours_formatted, interval)
             }
         }
     }
@@ -35,27 +42,42 @@ object FormatUtils {
         }
     }
 
-    fun getNextDoseWarning(med: MedicationEntity, nowEpochMs: Long): String? {
-        if (med.frequency != Frequency.HOURLY || med.lastTakenEpochMs == 0L) return null
+    fun getNextDoseWarning(context: Context, med: MedicationEntity, nowEpochMs: Long): String? {
+        if (med.lastTakenEpochMs == 0L) return null
 
-        val intervalMs = med.hourlyInterval * 3600_000L
+        val intervalMs = when (med.frequency) {
+            Frequency.HOURLY -> med.hourlyInterval * 3600_000L
+            Frequency.DAILY -> med.dailyInterval * 86400_000L
+        }
+
+        if (intervalMs <= 0) return null
+
         val nextDoseAt = med.lastTakenEpochMs + intervalMs
         val remainingMs = nextDoseAt - nowEpochMs
 
         if (remainingMs <= 0) return null
 
-        val remainingHours = remainingMs / 3600_000L
+        val remainingDays = remainingMs / 86400_000L
+        val remainingHours = (remainingMs % 86400_000L) / 3600_000L
         val remainingMinutes = (remainingMs % 3600_000L) / 60_000L
 
-        val timeStr = when {
-            remainingHours > 0 -> {
-                val hStr = if (remainingHours == 1L) "1 hour" else "$remainingHours hours"
-                val mStr = if (remainingMinutes > 0) " and ${if (remainingMinutes == 1L) "1 minute" else "$remainingMinutes minutes"}" else ""
-                "$hStr$mStr"
-            }
-            else -> if (remainingMinutes <= 1) "less than a minute" else "$remainingMinutes minutes"
+        val timeParts = mutableListOf<String>()
+        if (remainingDays > 0) {
+            timeParts.add(if (remainingDays == 1L) context.getString(R.string.time_day) else context.getString(R.string.time_days, remainingDays))
+        }
+        if (remainingHours > 0) {
+            timeParts.add(if (remainingHours == 1L) context.getString(R.string.time_hour) else context.getString(R.string.time_hours, remainingHours))
+        }
+        if (remainingMinutes > 0 || timeParts.isEmpty()) {
+            timeParts.add(if (remainingMinutes <= 1L) context.getString(R.string.time_less_than_minute) else context.getString(R.string.time_minutes, remainingMinutes))
         }
 
-        return "Warning: Your next dose is not due for another $timeStr. Taking it now may exceed your recommended dosage."
+        val timeStr = when (timeParts.size) {
+            1 -> timeParts[0]
+            2 -> "${timeParts[0]}${context.getString(R.string.time_separator_and)}${timeParts[1]}"
+            else -> "${timeParts[0]}${context.getString(R.string.time_separator_comma)}${timeParts[1]}${context.getString(R.string.time_separator_comma_and)}${timeParts[2]}"
+        }
+
+        return context.getString(R.string.next_dose_warning_prefix, timeStr)
     }
 }

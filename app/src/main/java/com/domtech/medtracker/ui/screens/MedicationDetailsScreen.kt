@@ -52,6 +52,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 
+import androidx.compose.ui.res.stringResource
+import com.domtech.medtracker.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicationDetailsScreen(
@@ -59,6 +62,7 @@ fun MedicationDetailsScreen(
     onBack: () -> Unit,
     onEdit: () -> Unit,
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val repo = LocalRepository.current
     val scheduler = ReminderScheduler.current()
     val vm: MedDetailsViewModel =
@@ -78,12 +82,12 @@ fun MedicationDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(med?.name ?: "Medication") },
+                title = { Text(med?.name ?: stringResource(R.string.medication)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -91,7 +95,7 @@ fun MedicationDetailsScreen(
                     IconButton(onClick = onEdit) {
                         Icon(
                             imageVector = Icons.Filled.Edit,
-                            contentDescription = "Edit",
+                            contentDescription = stringResource(R.string.edit),
                         )
                     }
                 },
@@ -101,7 +105,7 @@ fun MedicationDetailsScreen(
         val m = med
         if (m == null) {
             Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-                Text("Not found.")
+                Text(stringResource(R.string.not_found))
             }
             return@Scaffold
         }
@@ -115,7 +119,7 @@ fun MedicationDetailsScreen(
         ) {
             val low = m.currentLevel <= m.lowLevelThreshold
             Text(
-                text = if (low) "LOW STOCK ALERT" else "IN STOCK",
+                text = if (low) stringResource(R.string.low_stock_alert) else stringResource(R.string.in_stock),
                 color = if (low) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
             )
@@ -128,16 +132,16 @@ fun MedicationDetailsScreen(
             )
 
             Text(
-                text = "Current Level: ${FormatUtils.formatDose(m.currentLevel, m.doseUnit)}",
+                text = stringResource(R.string.current_level, FormatUtils.formatDose(m.currentLevel, m.doseUnit)),
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(
-                text = "Frequency: ${FormatUtils.formatFrequency(m)}",
+                text = stringResource(R.string.frequency_label, FormatUtils.formatFrequency(context, m)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "Restock threshold: ${m.lowLevelThreshold}",
+                text = stringResource(R.string.restock_threshold_label, m.lowLevelThreshold.toString()),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -150,13 +154,13 @@ fun MedicationDetailsScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Dose & Inventory", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.dose_inventory), style = MaterialTheme.typography.titleMedium)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Button(
                             onClick = { doseToConfirm = m.doseAmount },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Take ${FormatUtils.formatDose(m.doseAmount, m.doseUnit)}")
+                            Text(stringResource(R.string.take_dose, FormatUtils.formatDose(m.doseAmount, m.doseUnit)))
                         }
                         OutlinedButton(
                             onClick = { 
@@ -166,7 +170,7 @@ fun MedicationDetailsScreen(
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Restock")
+                            Text(stringResource(R.string.restock))
                         }
                     }
                 }
@@ -175,9 +179,9 @@ fun MedicationDetailsScreen(
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                        Text("Reminders", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                        Text(stringResource(R.string.reminders), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                         OutlinedButton(onClick = { showAddReminder = !showAddReminder }) {
-                            Text(if (showAddReminder) "Cancel" else "Add")
+                            Text(if (showAddReminder) stringResource(R.string.cancel) else stringResource(R.string.add))
                         }
                     }
 
@@ -190,7 +194,7 @@ fun MedicationDetailsScreen(
                             OutlinedTextField(
                                 value = timeText,
                                 onValueChange = { timeText = it },
-                                label = { Text("Time (HH:MM)") },
+                                label = { Text(stringResource(R.string.time_hh_mm)) },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
                             )
@@ -210,14 +214,14 @@ fun MedicationDetailsScreen(
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
-                                Text("Save reminder")
+                                Text(stringResource(R.string.save_reminder))
                             }
                         }
                     }
 
                     if (reminders.isEmpty()) {
                         Text(
-                            "No reminders yet.",
+                            stringResource(R.string.no_reminders),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -229,17 +233,17 @@ fun MedicationDetailsScreen(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "${formatMinutesOfDay(r.minutesOfDay)} • ${Days.formatMask(r.daysOfWeekMask)}",
+                                        text = "${formatMinutesOfDay(r.minutesOfDay)} • ${Days.formatMask(context, r.daysOfWeekMask)}",
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
                                     Text(
-                                        text = if (r.enabled) "Enabled" else "Disabled",
+                                        text = if (r.enabled) stringResource(R.string.enabled) else stringResource(R.string.disabled),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                                 OutlinedButton(onClick = { vm.deleteReminder(r.id) }) {
-                                    Text("Delete")
+                                    Text(stringResource(R.string.delete))
                                 }
                             }
                             Spacer(Modifier.height(4.dp))
@@ -250,10 +254,10 @@ fun MedicationDetailsScreen(
 
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Recent intakes", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.recent_intakes), style = MaterialTheme.typography.titleMedium)
                     if (recent.isEmpty()) {
                         Text(
-                            "No intake history yet.",
+                            stringResource(R.string.no_intake_history),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -271,7 +275,7 @@ fun MedicationDetailsScreen(
             if (m.notes.isNotBlank()) {
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Notes", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.notes), style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(8.dp))
                         Text(m.notes, style = MaterialTheme.typography.bodyMedium)
                     }
@@ -282,10 +286,10 @@ fun MedicationDetailsScreen(
 
     doseToConfirm?.let { amount ->
         val m = med
-        val warning = if (m != null) FormatUtils.getNextDoseWarning(m, System.currentTimeMillis()) else null
+        val warning = if (m != null) FormatUtils.getNextDoseWarning(context, m, System.currentTimeMillis()) else null
         AlertDialog(
             onDismissRequest = { doseToConfirm = null },
-            title = { Text(if (warning != null) "Early Dose Warning" else "Confirm Dose") },
+            title = { Text(if (warning != null) stringResource(R.string.early_dose_warning) else stringResource(R.string.confirm_dose)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (warning != null) {
@@ -295,7 +299,11 @@ fun MedicationDetailsScreen(
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                         )
                     }
-                    Text("Are you taking ${FormatUtils.formatDose(amount, m?.doseUnit ?: "")} of ${m?.name}?")
+                    Text(stringResource(
+                        R.string.confirm_dose_prompt,
+                        FormatUtils.formatDose(amount, m?.doseUnit ?: ""),
+                        m?.name ?: ""
+                    ))
                 }
             },
             confirmButton = {
@@ -305,12 +313,12 @@ fun MedicationDetailsScreen(
                         doseToConfirm = null
                     }
                 ) {
-                    Text("Confirm")
+                    Text(stringResource(R.string.confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { doseToConfirm = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -319,14 +327,14 @@ fun MedicationDetailsScreen(
     if (showRestockDialog) {
         AlertDialog(
             onDismissRequest = { showRestockDialog = false },
-            title = { Text("Restock ${med?.name}") },
+            title = { Text(stringResource(R.string.restock_title, med?.name ?: "")) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("How many ${med?.doseUnit}s are you adding?")
+                    Text(stringResource(R.string.restock_prompt, med?.doseUnit ?: ""))
                     OutlinedTextField(
                         value = restockAmount,
                         onValueChange = { restockAmount = it },
-                        label = { Text("Amount") },
+                        label = { Text(stringResource(R.string.amount)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
@@ -344,12 +352,12 @@ fun MedicationDetailsScreen(
                     },
                     enabled = restockAmount.toDoubleOrNull() != null
                 ) {
-                    Text("Add to Inventory")
+                    Text(stringResource(R.string.add_to_inventory))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRestockDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -359,7 +367,7 @@ fun MedicationDetailsScreen(
 @Composable
 private fun DaysPicker(mask: Int, onChange: (Int) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Days", style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(R.string.days), style = MaterialTheme.typography.labelLarge)
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),

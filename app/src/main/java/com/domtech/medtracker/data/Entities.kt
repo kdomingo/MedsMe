@@ -31,6 +31,7 @@ data class MedicationEntity(
     val doseUnit: String,
     val frequency: Frequency = Frequency.DAILY,
     val hourlyInterval: Int = 0,
+    val dailyInterval: Int = 1,
     val notes: String,
     val currentLevel: Double,
     val lowLevelThreshold: Double,
