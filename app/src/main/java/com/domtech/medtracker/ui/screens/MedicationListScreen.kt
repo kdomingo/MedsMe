@@ -54,12 +54,16 @@ import com.domtech.medtracker.ui.viewmodel.SimpleVmFactory
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 
+import androidx.compose.ui.res.stringResource
+import com.domtech.medtracker.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicationListScreen(
     onAdd: () -> Unit,
     onOpen: (Long) -> Unit,
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val repo = LocalRepository.current
     val vm: MedListViewModel = viewModel(factory = SimpleVmFactory { MedListViewModel(repo) })
     val meds by vm.meds.collectAsStateWithLifecycle()
@@ -67,12 +71,12 @@ fun MedicationListScreen(
     var medicationToTake by remember { mutableStateOf<MedicationEntity?>(null) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Medications") }) },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.medications)) }) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAdd) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Add medication",
+                    contentDescription = stringResource(R.string.add_medication_desc),
                 )
             }
         },
@@ -84,7 +88,7 @@ fun MedicationListScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No medications yet. Tap + to add one.")
+                Text(stringResource(R.string.no_medications))
             }
         } else {
             LazyColumn(
@@ -107,10 +111,10 @@ fun MedicationListScreen(
     }
 
     medicationToTake?.let { med ->
-        val warning = FormatUtils.getNextDoseWarning(med, System.currentTimeMillis())
+        val warning = FormatUtils.getNextDoseWarning(context, med, System.currentTimeMillis())
         AlertDialog(
             onDismissRequest = { medicationToTake = null },
-            title = { Text(if (warning != null) "Early Dose Warning" else "Confirm Dose") },
+            title = { Text(if (warning != null) stringResource(R.string.early_dose_warning) else stringResource(R.string.confirm_dose)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (warning != null) {
@@ -120,7 +124,11 @@ fun MedicationListScreen(
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                         )
                     }
-                    Text("Are you taking ${FormatUtils.formatDose(med.doseAmount, med.doseUnit)} of ${med.name}?")
+                    Text(stringResource(
+                        R.string.confirm_dose_prompt,
+                        FormatUtils.formatDose(med.doseAmount, med.doseUnit),
+                        med.name
+                    ))
                 }
             },
             confirmButton = {
@@ -130,12 +138,12 @@ fun MedicationListScreen(
                         medicationToTake = null
                     }
                 ) {
-                    Text("Confirm")
+                    Text(stringResource(R.string.confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { medicationToTake = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -148,6 +156,7 @@ private fun MedicationRow(
     onClick: () -> Unit,
     onTake: () -> Unit,
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val fractionTarget = (med.currentLevel / (med.lowLevelThreshold.coerceAtLeast(1.0) * 2.0))
         .toFloat()
         .coerceIn(0f, 1f)
@@ -182,14 +191,14 @@ private fun MedicationRow(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${FormatUtils.formatFrequency(med)} • Level: ${FormatUtils.formatDose(med.currentLevel, med.doseUnit)}",
+                        text = "${FormatUtils.formatFrequency(context, med)} • Level: ${FormatUtils.formatDose(med.currentLevel, med.doseUnit)}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 if (low) {
                     Text(
-                        text = "LOW STOCK",
+                        text = stringResource(R.string.low_stock),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -209,7 +218,7 @@ private fun MedicationRow(
                     contentPadding = PaddingValues(horizontal = 12.dp),
                     modifier = Modifier.height(32.dp)
                 ) {
-                    Text("Take", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.take), style = MaterialTheme.typography.labelSmall)
                 }
             }
         }

@@ -1,11 +1,17 @@
 package com.domtech.medtracker
 
+import androidx.test.core.app.ApplicationProvider
 import com.domtech.medtracker.ui.util.Days
 import com.domtech.medtracker.ui.util.formatMinutesOfDay
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class TimeAndDaysTest {
+    private val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+
     @Test
     fun formatMinutesOfDay_zeroPadsAndClamps() {
         assertThat(formatMinutesOfDay(0)).isEqualTo("00:00")
@@ -18,9 +24,9 @@ class TimeAndDaysTest {
         var mask = 0
         mask = Days.toggle(mask, Days.all.first { it.shortLabel == "Mon" }.bit)
         mask = Days.toggle(mask, Days.all.first { it.shortLabel == "Wed" }.bit)
-        assertThat(Days.formatMask(mask)).isEqualTo("Mon, Wed")
+        assertThat(Days.formatMask(context, mask)).isEqualTo("Mon, Wed")
 
         mask = Days.toggle(mask, Days.all.first { it.shortLabel == "Mon" }.bit)
-        assertThat(Days.formatMask(mask)).isEqualTo("Wed")
+        assertThat(Days.formatMask(context, mask)).isEqualTo("Wed")
     }
 }

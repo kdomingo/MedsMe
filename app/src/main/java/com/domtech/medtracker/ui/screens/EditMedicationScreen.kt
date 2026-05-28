@@ -35,6 +35,9 @@ import com.domtech.medtracker.ui.LocalRepository
 import com.domtech.medtracker.ui.viewmodel.EditMedicationViewModel
 import com.domtech.medtracker.ui.viewmodel.SimpleVmFactory
 
+import androidx.compose.ui.res.stringResource
+import com.domtech.medtracker.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditMedicationScreen(
@@ -53,6 +56,7 @@ fun EditMedicationScreen(
     var doseUnit by remember { mutableStateOf("tablet") }
     var frequency by remember { mutableStateOf(Frequency.DAILY) }
     var hourlyInterval by remember { mutableStateOf("4") }
+    var dailyInterval by remember { mutableStateOf("1") }
     var notes by remember { mutableStateOf("") }
     var currentLevel by remember { mutableStateOf("0") }
     var lowThreshold by remember { mutableStateOf("0") }
@@ -64,6 +68,7 @@ fun EditMedicationScreen(
         doseUnit = e.doseUnit
         frequency = e.frequency
         hourlyInterval = e.hourlyInterval.toString()
+        dailyInterval = e.dailyInterval.toString()
         notes = e.notes
         currentLevel = e.currentLevel.toString()
         lowThreshold = e.lowLevelThreshold.toString()
@@ -72,7 +77,7 @@ fun EditMedicationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (medId == null) "Add medication" else "Edit medication") },
+                title = { Text(if (medId == null) stringResource(R.string.add_medication) else stringResource(R.string.edit_medication)) },
             )
         },
     ) { padding ->
@@ -86,7 +91,7 @@ fun EditMedicationScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.name)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -95,7 +100,7 @@ fun EditMedicationScreen(
                 OutlinedTextField(
                     value = doseAmount,
                     onValueChange = { doseAmount = it },
-                    label = { Text("Dose amount") },
+                    label = { Text(stringResource(R.string.dose_amount)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.weight(1f),
                     singleLine = true,
@@ -103,19 +108,25 @@ fun EditMedicationScreen(
                 OutlinedTextField(
                     value = doseUnit,
                     onValueChange = { doseUnit = it },
-                    label = { Text("Unit (e.g. tablet)") },
+                    label = { Text(stringResource(R.string.unit_hint)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                 )
             }
 
-            Text("Frequency", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.frequency), style = MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Frequency.entries.forEach { f ->
                     FilterChip(
                         selected = frequency == f,
                         onClick = { frequency = f },
-                        label = { Text(f.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                        label = { 
+                            val label = when(f) {
+                                Frequency.DAILY -> stringResource(R.string.freq_daily)
+                                Frequency.HOURLY -> stringResource(R.string.freq_hourly)
+                            }
+                            Text(label) 
+                        }
                     )
                 }
             }
@@ -124,7 +135,16 @@ fun EditMedicationScreen(
                 OutlinedTextField(
                     value = hourlyInterval,
                     onValueChange = { hourlyInterval = it },
-                    label = { Text("Every X hours") },
+                    label = { Text(stringResource(R.string.every_x_hours)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+            } else {
+                OutlinedTextField(
+                    value = dailyInterval,
+                    onValueChange = { dailyInterval = it },
+                    label = { Text(stringResource(R.string.every_x_days)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -134,7 +154,7 @@ fun EditMedicationScreen(
             OutlinedTextField(
                 value = currentLevel,
                 onValueChange = { currentLevel = it },
-                label = { Text("Current level (inventory)") },
+                label = { Text(stringResource(R.string.current_level_inventory)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -143,7 +163,7 @@ fun EditMedicationScreen(
             OutlinedTextField(
                 value = lowThreshold,
                 onValueChange = { lowThreshold = it },
-                label = { Text("Low level threshold") },
+                label = { Text(stringResource(R.string.low_level_threshold)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -152,7 +172,7 @@ fun EditMedicationScreen(
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
-                label = { Text("Notes") },
+                label = { Text(stringResource(R.string.notes)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
             )
@@ -167,6 +187,7 @@ fun EditMedicationScreen(
                         doseUnit = doseUnit,
                         frequency = frequency,
                         hourlyInterval = hourlyInterval.toIntOrNull() ?: 0,
+                        dailyInterval = dailyInterval.toIntOrNull() ?: 1,
                         notes = notes,
                         currentLevel = currentLevel.toDoubleOrNull() ?: 0.0,
                         lowLevelThreshold = lowThreshold.toDoubleOrNull() ?: 0.0,
@@ -175,11 +196,11 @@ fun EditMedicationScreen(
                 enabled = name.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
 
             Text(
-                text = "Tip: inventory decreases when you tap “Take dose”.",
+                text = stringResource(R.string.inventory_tip),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
