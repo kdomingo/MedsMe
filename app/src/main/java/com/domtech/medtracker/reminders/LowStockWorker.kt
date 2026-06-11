@@ -6,17 +6,21 @@ import android.content.Intent
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.core.app.TaskStackBuilder
+import androidx.hilt.work.HiltWorker
 import com.domtech.medtracker.MainActivity
-import com.domtech.medtracker.MedTrackerApplication
 import com.domtech.medtracker.R
+import com.domtech.medtracker.data.MedRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
-class LowStockWorker(
-    appContext: Context,
-    params: WorkerParameters,
+@HiltWorker
+class LowStockWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted params: WorkerParameters,
+    private val repo: MedRepository,
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result {
-        val app = applicationContext as MedTrackerApplication
-        val low = app.repo.listLowStock()
+        val low = repo.listLowStock()
         if (low.isEmpty()) return Result.success()
 
         val title = applicationContext.getString(R.string.notification_low_stock_title)

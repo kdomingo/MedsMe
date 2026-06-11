@@ -1,23 +1,56 @@
 package com.domtech.medtracker.ui.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.domtech.medtracker.data.Frequency
+import com.domtech.medtracker.data.IntakeEventEntity
 import com.domtech.medtracker.data.IntakeReminderEntity
 import com.domtech.medtracker.data.MedRepository
 import com.domtech.medtracker.data.MedicationEntity
 import com.domtech.medtracker.reminders.ReminderScheduler
+import com.domtech.medtracker.ui.Route
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MedListViewModel(
+data class MedListUiState(
+    val meds: List<MedicationEntity> = emptyList(),
+    val searchQuery: String = "",
+    val isLoading: Boolean = false
+)
+
+@HiltViewModel
+class MedListViewModel @Inject constructor(
     private val repo: MedRepository,
 ) : ViewModel() {
-    val meds: StateFlow<List<MedicationEntity>> =
-        repo.observeMeds().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    private val _searchQuery = MutableStateFlow("")
+    
+    val uiState: StateFlow<MedListUiState> = combine(
+        repo.observeMeds(),
+        _searchQuery
+    ) { meds, query ->
+        val filtered = if (query.isBlank()) meds else {
+            meds.filter { it.name.contains(query, ignoreCase = true) }
+        }
+        MedListUiState(meds = filtered, searchQuery = query)
+    }.stateIn(
+        viewModelScope, 
+        SharingStarted.WhileSubscribed(5_000), 
+        MedListUiState(isLoading = true)
+    )
+
+    fun onSearchQueryChange(query: String) {
+        _searchQuery.value = query
+    }
 
     fun takeDose(medId: Long, amount: Double) {
         viewModelScope.launch {
@@ -26,21 +59,30 @@ class MedListViewModel(
     }
 }
 
-class MedDetailsViewModel(
+data class MedDetailsUiState(
+    val med: MedicationEntity? = null,
+    val reminders: List<IntakeReminderEntity> = emptyList(),
+    val recentIntakes: List<IntakeEventEntity> = emptyList(),
+    val isLoading: Boolean = false
+)
+
+@HiltViewModel
+class MedDetailsViewModel @Inject constructor(
     private val repo: MedRepository,
     private val scheduler: ReminderScheduler,
-    private val medId: Long,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    val med: StateFlow<MedicationEntity?> =
-        repo.observeMed(medId).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    private val route: Route.Details = savedStateHandle.toRoute()
+    private val medId = route.id
 
-    val reminders: StateFlow<List<IntakeReminderEntity>> =
-        repo.observeRemindersForMed(medId)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    val recentIntakes =
+    val uiState: StateFlow<MedDetailsUiState> = combine(
+        repo.observeMed(medId),
+        repo.observeRemindersForMed(medId),
         repo.observeRecentIntakes(medId)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    ) { med, reminders, recent ->
+        MedDetailsUiState(med, reminders, recent)
+    }
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MedDetailsUiState(isLoading = true))
 
     fun takeDose(amount: Double) {
         viewModelScope.launch {
@@ -50,8 +92,19 @@ class MedDetailsViewModel(
 
     fun restock(amount: Double) {
         viewModelScope.launch {
-            val current = med.value?.currentLevel ?: 0.0
+            val current = uiState.value.med?.currentLevel ?: 0.0
             repo.setLevel(medId, current + amount, System.currentTimeMillis())
+        }
+    }
+
+    fun deleteMedication(onDeleted: () -> Unit) {
+        viewModelScope.launch {
+            // First cancel all reminders
+            uiState.value.reminders.forEach { 
+                scheduler.cancelReminder(it.id)
+            }
+            repo.deleteMedication(medId)
+            onDeleted()
         }
     }
 
@@ -81,14 +134,29 @@ class MedDetailsViewModel(
     }
 }
 
-class EditMedicationViewModel(
+data class EditMedicationUiState(
+    val existing: MedicationEntity? = null,
+    val isLoading: Boolean = false
+)
+
+@HiltViewModel
+class EditMedicationViewModel @Inject constructor(
     private val repo: MedRepository,
     private val scheduler: ReminderScheduler,
-    private val medId: Long?,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    val existing: StateFlow<MedicationEntity?> =
-        (medId?.let { repo.observeMed(it) } ?: kotlinx.coroutines.flow.flowOf(null))
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    // Both Add and Edit routes use this ViewModel. 
+    // We can check if it's Route.Edit or Route.Add
+    private val medId: Long? = try {
+        val edit: Route.Edit = savedStateHandle.toRoute()
+        edit.id
+    } catch (e: Exception) {
+        null
+    }
+
+    val uiState: StateFlow<EditMedicationUiState> = (medId?.let { repo.observeMed(it) } ?: flowOf(null))
+        .map { EditMedicationUiState(existing = it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EditMedicationUiState(isLoading = medId != null))
 
     fun save(
         name: String,
@@ -122,11 +190,3 @@ class EditMedicationViewModel(
         }
     }
 }
-
-class SimpleVmFactory<T : ViewModel>(
-    private val create: () -> T,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <VM : ViewModel> create(modelClass: Class<VM>): VM = create() as VM
-}
-

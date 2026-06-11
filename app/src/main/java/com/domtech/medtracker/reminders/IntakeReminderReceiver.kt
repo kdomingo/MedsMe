@@ -7,11 +7,16 @@ import android.app.PendingIntent
 import androidx.core.app.TaskStackBuilder
 import com.domtech.medtracker.MainActivity
 import com.domtech.medtracker.R
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class IntakeReminderReceiver : BroadcastReceiver() {
+    @Inject lateinit var scheduler: ReminderScheduler
+
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != ACTION_REMINDER) return
         val reminderId = intent.getLongExtra(EXTRA_REMINDER_ID, -1L)
@@ -36,7 +41,7 @@ class IntakeReminderReceiver : BroadcastReceiver() {
 
         // Reschedule next occurrence for this reminder.
         CoroutineScope(Dispatchers.Default).launch {
-            ReminderScheduler(context).scheduleReminder(reminderId)
+            scheduler.scheduleReminder(reminderId)
         }
     }
 

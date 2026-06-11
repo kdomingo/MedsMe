@@ -15,6 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,40 +41,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.domtech.medtracker.reminders.ReminderScheduler
-import com.domtech.medtracker.ui.LocalRepository
+import com.domtech.medtracker.R
 import com.domtech.medtracker.ui.util.Days
 import com.domtech.medtracker.ui.util.FormatUtils
 import com.domtech.medtracker.ui.util.formatMinutesOfDay
 import com.domtech.medtracker.ui.viewmodel.MedDetailsViewModel
-import com.domtech.medtracker.ui.viewmodel.SimpleVmFactory
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
-
-import androidx.compose.ui.res.stringResource
-import com.domtech.medtracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicationDetailsScreen(
-    medId: Long,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val repo = LocalRepository.current
-    val scheduler = ReminderScheduler.current()
-    val vm: MedDetailsViewModel =
-        viewModel(factory = SimpleVmFactory { MedDetailsViewModel(repo, scheduler, medId) })
+    val vm: MedDetailsViewModel = hiltViewModel()
 
-    val med by vm.med.collectAsStateWithLifecycle()
-    val reminders by vm.reminders.collectAsStateWithLifecycle()
-    val recent by vm.recentIntakes.collectAsStateWithLifecycle()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+    val med = uiState.med
+    val reminders = uiState.reminders
+    val recent = uiState.recentIntakes
 
     var showAddReminder by remember { mutableStateOf(false) }
     var timeText by remember { mutableStateOf("08:00") }
@@ -78,8 +73,10 @@ fun MedicationDetailsScreen(
     var doseToConfirm by remember { mutableStateOf<Double?>(null) }
     var showRestockDialog by remember { mutableStateOf(false) }
     var restockAmount by remember { mutableStateOf("") }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(med?.name ?: stringResource(R.string.medication)) },
@@ -96,6 +93,12 @@ fun MedicationDetailsScreen(
                         Icon(
                             imageVector = Icons.Filled.Edit,
                             contentDescription = stringResource(R.string.edit),
+                        )
+                    }
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.delete),
                         )
                     }
                 },
@@ -362,6 +365,32 @@ fun MedicationDetailsScreen(
             }
         )
     }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.delete_confirmation_title)) },
+            text = {
+                Text(stringResource(R.string.delete_confirmation_text, med?.name ?: ""))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        vm.deleteMedication { onBack() }
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -404,4 +433,3 @@ private fun parseMinutesOfDayOrNull(text: String): Int? {
     if (h !in 0..23 || m !in 0..59) return null
     return h * 60 + m
 }
-

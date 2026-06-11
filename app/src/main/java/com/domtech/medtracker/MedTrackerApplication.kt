@@ -1,25 +1,32 @@
 package com.domtech.medtracker
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.domtech.medtracker.data.AppDatabase
-import com.domtech.medtracker.data.MedRepository
 import com.domtech.medtracker.reminders.LowStockWorker
+import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class MedTrackerApplication : Application() {
-    lateinit var db: AppDatabase
-        private set
-    lateinit var repo: MedRepository
-        private set
+@HiltAndroidApp
+class MedTrackerApplication : Application(), Configuration.Provider {
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 
     override fun onCreate() {
         super.onCreate()
-        db = AppDatabase.build(this)
-        repo = MedRepository(db)
-
+        // db and repo will be injected by Hilt where needed, 
+        // but we might still need them for legacy reasons if we haven't refactored everything yet.
+        // For now, let's keep the manual init if needed, or remove if we trust Hilt.
+        // Actually, let's remove manual init of db and repo here and use injection.
+        
         try {
             val work = PeriodicWorkRequestBuilder<LowStockWorker>(12, TimeUnit.HOURS).build()
             WorkManager.getInstance(this).enqueueUniquePeriodicWork(

@@ -28,28 +28,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.domtech.medtracker.data.Frequency
-import com.domtech.medtracker.reminders.ReminderScheduler
-import com.domtech.medtracker.ui.LocalRepository
 import com.domtech.medtracker.ui.viewmodel.EditMedicationViewModel
-import com.domtech.medtracker.ui.viewmodel.SimpleVmFactory
-
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.domtech.medtracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditMedicationScreen(
-    medId: Long?,
     onDone: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val repo = LocalRepository.current
-    val scheduler = ReminderScheduler.current()
-    val vm: EditMedicationViewModel =
-        viewModel(factory = SimpleVmFactory { EditMedicationViewModel(repo, scheduler, medId) })
+    val vm: EditMedicationViewModel = hiltViewModel()
 
-    val existing by vm.existing.collectAsStateWithLifecycle()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+    val existing = uiState.existing
 
     var name by remember { mutableStateOf("") }
     var doseAmount by remember { mutableStateOf("1") }
@@ -75,9 +69,10 @@ fun EditMedicationScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(if (medId == null) stringResource(R.string.add_medication) else stringResource(R.string.edit_medication)) },
+                title = { Text(if (existing == null) stringResource(R.string.add_medication) else stringResource(R.string.edit_medication)) },
             )
         },
     ) { padding ->

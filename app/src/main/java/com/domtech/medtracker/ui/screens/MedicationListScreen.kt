@@ -16,10 +16,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Medication
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -27,8 +33,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -41,37 +50,65 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.domtech.medtracker.R
 import com.domtech.medtracker.data.MedicationEntity
-import com.domtech.medtracker.ui.LocalRepository
 import com.domtech.medtracker.ui.util.FormatUtils
 import com.domtech.medtracker.ui.viewmodel.MedListViewModel
-import com.domtech.medtracker.ui.viewmodel.SimpleVmFactory
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-
-import androidx.compose.ui.res.stringResource
-import com.domtech.medtracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicationListScreen(
     onAdd: () -> Unit,
     onOpen: (Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val repo = LocalRepository.current
-    val vm: MedListViewModel = viewModel(factory = SimpleVmFactory { MedListViewModel(repo) })
-    val meds by vm.meds.collectAsStateWithLifecycle()
+    val vm: MedListViewModel = hiltViewModel()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+    val meds = uiState.meds
 
     var medicationToTake by remember { mutableStateOf<MedicationEntity?>(null) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.medications)) }) },
+        modifier = modifier,
+        topBar = {
+            Column {
+                TopAppBar(title = { Text(stringResource(R.string.medications)) })
+                SearchBar(
+                    inputField = {
+                        SearchBarDefaults.InputField(
+                            query = uiState.searchQuery,
+                            onQueryChange = { vm.onSearchQueryChange(it) },
+                            onSearch = { },
+                            expanded = false,
+                            onExpandedChange = { },
+                            placeholder = { Text(stringResource(R.string.search_medications)) },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            trailingIcon = {
+                                if (uiState.searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { vm.onSearchQueryChange("") }) {
+                                        Icon(Icons.Default.Clear, contentDescription = null)
+                                    }
+                                }
+                            },
+                        )
+                    },
+                    expanded = false,
+                    onExpandedChange = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    content = { }
+                )
+            }
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onAdd) {
                 Icon(
@@ -82,14 +119,10 @@ fun MedicationListScreen(
         },
     ) { padding ->
         if (meds.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(stringResource(R.string.no_medications))
-            }
+            EmptyState(
+                searchQuery = uiState.searchQuery,
+                padding = padding
+            )
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -151,6 +184,43 @@ fun MedicationListScreen(
 }
 
 @Composable
+private fun EmptyState(
+    searchQuery: String,
+    padding: PaddingValues,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .padding(padding)
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Icon(
+                imageVector = if (searchQuery.isEmpty()) Icons.Default.Medication else Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+            )
+            Text(
+                text = if (searchQuery.isEmpty()) {
+                    stringResource(R.string.no_medications)
+                } else {
+                    stringResource(R.string.no_search_results, searchQuery)
+                },
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 private fun MedicationRow(
     med: MedicationEntity,
     onClick: () -> Unit,
@@ -179,6 +249,7 @@ private fun MedicationRow(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -248,4 +319,3 @@ internal fun LevelBar(
         )
     }
 }
-

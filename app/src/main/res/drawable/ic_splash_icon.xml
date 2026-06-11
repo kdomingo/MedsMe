@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:name="capsule"
+        android:pathData="M24,54 C24,37.4 37.4,24 54,24 C70.6,24 84,37.4 84,54 C84,70.6 70.6,84 54,84 C37.4,84 24,70.6 24,54 Z"
+        android:fillColor="#006494" />
+    <path
+        android:name="check"
+        android:pathData="M38,54 L50,66 L70,44"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:trimPathEnd="0" />
+</vector>

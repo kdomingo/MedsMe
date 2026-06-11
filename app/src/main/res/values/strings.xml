@@ -5,6 +5,8 @@
     <string name="medications">Medications</string>
     <string name="add_medication_desc">Add medication</string>
     <string name="no_medications">No medications yet. Tap + to add one.</string>
+    <string name="no_search_results">No medications matching “%s”</string>
+    <string name="search_medications">Search medications</string>
     <string name="take">Take</string>
     <string name="low_stock">LOW STOCK</string>
 
@@ -12,6 +14,9 @@
     <string name="medication">Medication</string>
     <string name="back">Back</string>
     <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirmation_title">Delete medication?</string>
+    <string name="delete_confirmation_text">Are you sure you want to delete %s? This will also remove all associated reminders and history. This action cannot be undone.</string>
     <string name="not_found">Not found.</string>
     <string name="low_stock_alert">LOW STOCK ALERT</string>
     <string name="in_stock">IN STOCK</string>
@@ -28,7 +33,6 @@
     <string name="no_reminders">No reminders yet.</string>
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
-    <string name="delete">Delete</string>
     <string name="recent_intakes">Recent intakes</string>
     <string name="no_intake_history">No intake history yet.</string>
     <string name="notes">Notes</string>
