@@ -227,6 +227,8 @@ private fun MedicationRow(
     onTake: () -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val medColor = Color(med.colorArgb)
+    
     val fractionTarget = (med.currentLevel / (med.lowLevelThreshold.coerceAtLeast(1.0) * 2.0))
         .toFloat()
         .coerceIn(0f, 1f)
@@ -239,7 +241,7 @@ private fun MedicationRow(
 
     val low = med.currentLevel <= med.lowLevelThreshold
     val barColor by animateColorAsState(
-        targetValue = if (low) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+        targetValue = if (low) MaterialTheme.colorScheme.error else medColor,
         label = "barColor",
     )
 
@@ -256,7 +258,7 @@ private fun MedicationRow(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = med.name,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMedium.copy(color = medColor),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

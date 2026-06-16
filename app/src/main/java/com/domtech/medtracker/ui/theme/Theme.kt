@@ -15,47 +15,53 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = BluePrimaryDark,
-    onPrimary = BlueOnPrimaryDark,
-    primaryContainer = BlueContainerDark,
-    onPrimaryContainer = OnBlueContainerDark,
-    secondary = TealSecondaryDark,
-    onSecondary = TealOnSecondaryDark,
-    secondaryContainer = TealContainerDark,
-    onSecondaryContainer = OnTealContainerDark,
-    error = RedErrorDark,
-    onError = RedOnErrorDark,
-    errorContainer = RedContainerDark,
-    onErrorContainer = OnRedContainerDark,
-    background = NeutralBackgroundDark,
-    onBackground = NeutralOnBackgroundDark,
-    surface = NeutralSurfaceDark,
-    onSurface = NeutralOnSurfaceDark
+    primary = MedGreenPrimaryDark,
+    onPrimary = MedGreenOnPrimaryDark,
+    primaryContainer = MedGreenContainerDark,
+    onPrimaryContainer = MedGreenOnContainerDark,
+    secondary = MedRedSecondaryDark,
+    onSecondary = MedRedOnSecondaryDark,
+    secondaryContainer = MedRedContainerDark,
+    onSecondaryContainer = MedRedOnSecondaryContainerDark,
+    error = MedErrorDark,
+    onError = MedOnErrorDark,
+    errorContainer = MedErrorContainerDark,
+    onErrorContainer = MedOnErrorContainerDark,
+    background = MedBackgroundDark,
+    onBackground = MedOnBackgroundDark,
+    surface = MedSurfaceDark,
+    onSurface = MedOnSurfaceDark,
+    surfaceVariant = MedSurfaceVariantDark,
+    onSurfaceVariant = MedOnSurfaceVariantDark,
+    outline = MedOutlineDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = BluePrimary,
-    onPrimary = BlueOnPrimary,
-    primaryContainer = BlueContainer,
-    onPrimaryContainer = OnBlueContainer,
-    secondary = TealSecondary,
-    onSecondary = TealOnSecondary,
-    secondaryContainer = TealContainer,
-    onSecondaryContainer = OnTealContainer,
-    error = RedError,
-    onError = RedOnError,
-    errorContainer = RedContainer,
-    onErrorContainer = OnRedContainer,
-    background = NeutralBackground,
-    onBackground = NeutralOnBackground,
-    surface = NeutralSurface,
-    onSurface = NeutralOnSurface
+    primary = MedGreenPrimary,
+    onPrimary = MedGreenOnPrimary,
+    primaryContainer = MedGreenContainer,
+    onPrimaryContainer = MedGreenOnContainer,
+    secondary = MedRedSecondary,
+    onSecondary = MedRedOnSecondary,
+    secondaryContainer = MedRedContainer,
+    onSecondaryContainer = MedRedOnSecondaryContainer,
+    error = MedError,
+    onError = MedOnError,
+    errorContainer = MedErrorContainer,
+    onErrorContainer = MedOnErrorContainer,
+    background = MedBackground,
+    onBackground = MedOnBackground,
+    surface = MedSurface,
+    onSurface = MedOnSurface,
+    surfaceVariant = MedSurfaceVariant,
+    onSurfaceVariant = MedOnSurfaceVariant,
+    outline = MedOutline
 )
 
 @Composable
 fun MedTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled to enforce the Green/Red medical theme
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

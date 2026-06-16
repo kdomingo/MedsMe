@@ -27,6 +27,7 @@ class MedRepository(
         notes: String,
         currentLevel: Double,
         lowLevelThreshold: Double,
+        colorArgb: Int,
         nowEpochMs: Long,
     ): Long {
         val existing = if (id != 0L) meds.getById(id) else null
@@ -42,6 +43,7 @@ class MedRepository(
             currentLevel = currentLevel,
             lowLevelThreshold = lowLevelThreshold,
             lastTakenEpochMs = existing?.lastTakenEpochMs ?: 0L,
+            colorArgb = colorArgb,
             updatedAtEpochMs = nowEpochMs,
         )
         return meds.upsert(entity)

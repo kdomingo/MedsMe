@@ -52,9 +52,9 @@ class MedListViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    fun takeDose(medId: Long, amount: Double) {
+    fun takeDose(medId: Long, amount: Double, timestampMs: Long = System.currentTimeMillis()) {
         viewModelScope.launch {
-            repo.takeDose(medId, amount, System.currentTimeMillis())
+            repo.takeDose(medId, amount, timestampMs)
         }
     }
 }
@@ -84,9 +84,9 @@ class MedDetailsViewModel @Inject constructor(
     }
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MedDetailsUiState(isLoading = true))
 
-    fun takeDose(amount: Double) {
+    fun takeDose(amount: Double, timestampMs: Long = System.currentTimeMillis()) {
         viewModelScope.launch {
-            repo.takeDose(medId, amount, System.currentTimeMillis())
+            repo.takeDose(medId, amount, timestampMs)
         }
     }
 
@@ -145,14 +145,8 @@ class EditMedicationViewModel @Inject constructor(
     private val scheduler: ReminderScheduler,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    // Both Add and Edit routes use this ViewModel. 
-    // We can check if it's Route.Edit or Route.Add
-    private val medId: Long? = try {
-        val edit: Route.Edit = savedStateHandle.toRoute()
-        edit.id
-    } catch (e: Exception) {
-        null
-    }
+    // Both Add and Edit routes use this ViewModel.
+    private val medId: Long? = runCatching { savedStateHandle.toRoute<Route.Edit>().id }.getOrNull()
 
     val uiState: StateFlow<EditMedicationUiState> = (medId?.let { repo.observeMed(it) } ?: flowOf(null))
         .map { EditMedicationUiState(existing = it) }
@@ -168,6 +162,7 @@ class EditMedicationViewModel @Inject constructor(
         notes: String,
         currentLevel: Double,
         lowLevelThreshold: Double,
+        colorArgb: Int,
         onSaved: (Long) -> Unit,
     ) {
         viewModelScope.launch {
@@ -182,6 +177,7 @@ class EditMedicationViewModel @Inject constructor(
                 notes = notes,
                 currentLevel = currentLevel,
                 lowLevelThreshold = lowLevelThreshold,
+                colorArgb = colorArgb,
                 nowEpochMs = System.currentTimeMillis(),
             )
             // Ensure any enabled reminders remain scheduled (covers edit cases).

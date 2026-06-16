@@ -16,9 +16,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,10 +30,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import com.domtech.medtracker.ui.components.MedTrackerScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -74,43 +74,53 @@ fun MedicationDetailsScreen(
     var showRestockDialog by remember { mutableStateOf(false) }
     var restockAmount by remember { mutableStateOf("") }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showManualLogDialog by remember { mutableStateOf(false) }
+    var manualLogTime by remember { mutableStateOf("") }
+    var manualLogAmount by remember { mutableStateOf("") }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text(med?.name ?: stringResource(R.string.medication)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onEdit) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = stringResource(R.string.edit),
-                        )
-                    }
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.delete),
-                        )
-                    }
-                },
-            )
+    val dismissNotifications = {
+        val nm = androidx.core.app.NotificationManagerCompat.from(context)
+        reminders.forEach { nm.cancel(it.id.toInt()) }
+    }
+
+    val m = med
+    val medColor = if (m != null) Color(m.colorArgb) else MaterialTheme.colorScheme.primary
+
+    MedTrackerScaffold(
+        title = m?.name ?: stringResource(R.string.medication),
+        onBack = onBack,
+        actions = {
+            IconButton(onClick = { 
+                manualLogTime = formatMinutesOfDay(java.time.LocalTime.now().run { hour * 60 + minute })
+                manualLogAmount = med?.doseAmount?.toString() ?: ""
+                showManualLogDialog = true 
+            }) {
+                Icon(
+                    imageVector = Icons.Filled.History,
+                    contentDescription = stringResource(R.string.record_past_intake),
+                )
+            }
+            IconButton(onClick = onEdit) {
+                Icon(
+                    imageVector = Icons.Filled.Edit,
+                    contentDescription = stringResource(R.string.edit),
+                )
+            }
+            IconButton(onClick = { showDeleteDialog = true }) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.delete),
+                )
+            }
         },
+        modifier = modifier,
     ) { padding ->
         val m = med
         if (m == null) {
             Column(modifier = Modifier.padding(padding).padding(16.dp)) {
                 Text(stringResource(R.string.not_found))
             }
-            return@Scaffold
+            return@MedTrackerScaffold
         }
 
         Column(
@@ -131,12 +141,12 @@ fun MedicationDetailsScreen(
             val frac = (m.currentLevel / maxForBar).toFloat().coerceIn(0f, 1f)
             LevelBar(
                 fraction = frac,
-                color = if (low) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                color = if (low) MaterialTheme.colorScheme.error else medColor,
             )
 
             Text(
                 text = stringResource(R.string.current_level, FormatUtils.formatDose(m.currentLevel, m.doseUnit)),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge.copy(color = medColor),
             )
             Text(
                 text = stringResource(R.string.frequency_label, FormatUtils.formatFrequency(context, m)),
@@ -160,7 +170,9 @@ fun MedicationDetailsScreen(
                     Text(stringResource(R.string.dose_inventory), style = MaterialTheme.typography.titleMedium)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Button(
-                            onClick = { doseToConfirm = m.doseAmount },
+                            onClick = { 
+                                doseToConfirm = m.doseAmount
+                            },
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(stringResource(R.string.take_dose, FormatUtils.formatDose(m.doseAmount, m.doseUnit)))
@@ -310,14 +322,15 @@ fun MedicationDetailsScreen(
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        vm.takeDose(amount)
-                        doseToConfirm = null
+                    Button(
+                        onClick = {
+                            vm.takeDose(amount)
+                            dismissNotifications()
+                            doseToConfirm = null
+                        }
+                    ) {
+                        Text(stringResource(R.string.confirm))
                     }
-                ) {
-                    Text(stringResource(R.string.confirm))
-                }
             },
             dismissButton = {
                 TextButton(onClick = { doseToConfirm = null }) {
@@ -386,6 +399,58 @@ fun MedicationDetailsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showManualLogDialog) {
+        AlertDialog(
+            onDismissRequest = { showManualLogDialog = false },
+            title = { Text(stringResource(R.string.record_intake)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = manualLogAmount,
+                        onValueChange = { manualLogAmount = it },
+                        label = { Text(stringResource(R.string.dose_amount)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = manualLogTime,
+                        onValueChange = { manualLogTime = it },
+                        label = { Text(stringResource(R.string.intake_time)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val amount = manualLogAmount.toDoubleOrNull() ?: 0.0
+                        val minutes = parseMinutesOfDayOrNull(manualLogTime) ?: 0
+                        
+                        val timestamp = java.time.LocalDate.now()
+                            .atTime(java.time.LocalTime.of(minutes / 60, minutes % 60))
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toInstant()
+                            .toEpochMilli()
+
+                        vm.takeDose(amount, timestamp)
+                        dismissNotifications()
+                        showManualLogDialog = false
+                    },
+                    enabled = manualLogAmount.toDoubleOrNull() != null && parseMinutesOfDayOrNull(manualLogTime) != null
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showManualLogDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
