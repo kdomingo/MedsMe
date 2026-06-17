@@ -4,9 +4,8 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import com.domtech.medtracker.MedTrackerApplication
+import android.os.Build
+import com.domtech.medtracker.data.MedRepository
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -15,17 +14,16 @@ import java.time.ZoneId
 
 class ReminderScheduler(
     private val context: Context,
+    private val repo: MedRepository,
 ) {
     private val alarmManager: AlarmManager =
         context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     suspend fun rescheduleAllEnabled() {
-        val repo = (context.applicationContext as MedTrackerApplication).repo
         repo.listEnabledReminders().forEach { scheduleReminder(it.id) }
     }
 
     suspend fun scheduleReminder(reminderId: Long) {
-        val repo = (context.applicationContext as MedTrackerApplication).repo
         val reminder = repo.listEnabledReminders().firstOrNull { it.id == reminderId } ?: return
         scheduleNextOccurrence(reminder.id, reminder.minutesOfDay, reminder.daysOfWeekMask)
     }
@@ -39,11 +37,28 @@ class ReminderScheduler(
         val triggerAt = computeNextTriggerEpochMs(minutesOfDay, daysMask)
         val pi = pendingIntentFor(reminderId)
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAt,
-            pi,
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAt,
+                    pi,
+                )
+            } else {
+                // Fallback to inexact alarm if we don't have permission.
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAt,
+                    pi,
+                )
+            }
+        } else {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAt,
+                pi,
+            )
+        }
     }
 
     private fun pendingIntentFor(reminderId: Long): PendingIntent {
@@ -83,14 +98,6 @@ class ReminderScheduler(
 
         // Fallback: tomorrow same time.
         return LocalDateTime.of(today.plusDays(1), time).atZone(zone).toInstant().toEpochMilli()
-    }
-
-    companion object {
-        @Composable
-        fun current(): ReminderScheduler {
-            val ctx = LocalContext.current
-            return androidx.compose.runtime.remember(ctx) { ReminderScheduler(ctx) }
-        }
     }
 }
 

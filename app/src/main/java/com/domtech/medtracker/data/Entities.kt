@@ -36,6 +36,7 @@ data class MedicationEntity(
     val currentLevel: Double,
     val lowLevelThreshold: Double,
     val lastTakenEpochMs: Long = 0,
+    val colorArgb: Int = 0xFF006D3A.toInt(), // Default to MedGreenPrimary
     val updatedAtEpochMs: Long,
 )
 

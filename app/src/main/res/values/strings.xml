@@ -5,6 +5,8 @@
     <string name="medications">Medications</string>
     <string name="add_medication_desc">Add medication</string>
     <string name="no_medications">No medications yet. Tap + to add one.</string>
+    <string name="no_search_results">No medications matching “%s”</string>
+    <string name="search_medications">Search medications</string>
     <string name="take">Take</string>
     <string name="low_stock">LOW STOCK</string>
 
@@ -12,6 +14,9 @@
     <string name="medication">Medication</string>
     <string name="back">Back</string>
     <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirmation_title">Delete medication?</string>
+    <string name="delete_confirmation_text">Are you sure you want to delete %s? This will also remove all associated reminders and history. This action cannot be undone.</string>
     <string name="not_found">Not found.</string>
     <string name="low_stock_alert">LOW STOCK ALERT</string>
     <string name="in_stock">IN STOCK</string>
@@ -21,6 +26,10 @@
     <string name="dose_inventory">Dose &amp; Inventory</string>
     <string name="take_dose">Take %s</string>
     <string name="restock">Restock</string>
+    <string name="record_intake">Record Intake</string>
+    <string name="log_intake">Log Intake</string>
+    <string name="intake_time">Intake Time (HH:MM)</string>
+    <string name="record_past_intake">Record past intake</string>
     <string name="reminders">Reminders</string>
     <string name="add">Add</string>
     <string name="time_hh_mm">Time (HH:MM)</string>
@@ -28,7 +37,6 @@
     <string name="no_reminders">No reminders yet.</string>
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
-    <string name="delete">Delete</string>
     <string name="recent_intakes">Recent intakes</string>
     <string name="no_intake_history">No intake history yet.</string>
     <string name="notes">Notes</string>
@@ -56,6 +64,7 @@
     <string name="every_x_days">Every X days</string>
     <string name="current_level_inventory">Current level (inventory)</string>
     <string name="low_level_threshold">Low level threshold</string>
+    <string name="color">Color</string>
     <string name="save">Save</string>
     <string name="inventory_tip">Tip: inventory decreases when you tap “Take dose”.</string>
 
@@ -92,4 +101,12 @@
     <string name="next_dose_warning_prefix">Warning: Your next dose is not due for another %s. Taking it now may exceed your recommended dosage.</string>
 
     <string name="none">None</string>
+
+    <!-- Permissions -->
+    <string name="exact_alarm_permission_title">High-Precision Reminders</string>
+    <string name="exact_alarm_permission_text">To ensure your medication reminders arrive at the exact time, MedTracker needs permission to schedule exact alarms. Please enable this in the system settings.</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="not_now">Not Now</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
 </resources>
