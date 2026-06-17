@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Medication
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -69,6 +70,7 @@ import com.domtech.medtracker.ui.viewmodel.MedListViewModel
 fun MedicationListScreen(
     onAdd: () -> Unit,
     onOpen: (Long) -> Unit,
+    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -90,7 +92,11 @@ fun MedicationListScreen(
                         expanded = false,
                         onExpandedChange = { },
                         placeholder = { Text(stringResource(R.string.search_medications)) },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        leadingIcon = { 
+                            IconButton(onClick = onMenuClick) {
+                                Icon(androidx.compose.material.icons.Icons.Default.Menu, contentDescription = stringResource(R.string.menu)) 
+                            }
+                        },
                         trailingIcon = {
                             if (uiState.searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { vm.onSearchQueryChange("") }) {
