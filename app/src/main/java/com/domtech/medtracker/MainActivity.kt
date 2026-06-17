@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.domtech.medtracker.ui.AppNav
 import com.domtech.medtracker.ui.theme.MedTrackerTheme
+import com.domtech.medtracker.util.EnsureExactAlarmPermission
 import com.domtech.medtracker.util.EnsurePostNotificationsPermission
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
             MedTrackerTheme {
                 val focusManager = LocalFocusManager.current
                 EnsurePostNotificationsPermission()
+                EnsureExactAlarmPermission()
                 Surface(
                     color = MaterialTheme.colorScheme.background,
                     modifier = Modifier.pointerInput(Unit) {

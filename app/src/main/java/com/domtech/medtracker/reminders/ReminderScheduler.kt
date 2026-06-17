@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.domtech.medtracker.data.MedRepository
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -36,11 +37,28 @@ class ReminderScheduler(
         val triggerAt = computeNextTriggerEpochMs(minutesOfDay, daysMask)
         val pi = pendingIntentFor(reminderId)
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAt,
-            pi,
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAt,
+                    pi,
+                )
+            } else {
+                // Fallback to inexact alarm if we don't have permission.
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAt,
+                    pi,
+                )
+            }
+        } else {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAt,
+                pi,
+            )
+        }
     }
 
     private fun pendingIntentFor(reminderId: Long): PendingIntent {

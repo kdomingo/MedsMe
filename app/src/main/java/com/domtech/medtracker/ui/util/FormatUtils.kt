@@ -17,6 +17,18 @@ object FormatUtils {
         return "$amountStr $pluralUnit"
     }
 
+    fun formatTime12h(minutesOfDay: Int): String {
+        val h24 = minutesOfDay / 60
+        val m = minutesOfDay % 60
+        val amPm = if (h24 < 12) "AM" else "PM"
+        val h12 = when {
+            h24 == 0 -> 12
+            h24 > 12 -> h24 - 12
+            else -> h24
+        }
+        return "%d:%02d %s".format(Locale.US, h12, m, amPm)
+    }
+
     fun formatFrequency(context: Context, med: MedicationEntity): String {
         return when (med.frequency) {
             Frequency.DAILY -> {

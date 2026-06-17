@@ -71,6 +71,7 @@ android {
 
     testOptions {
         unitTests.isIncludeAndroidResources = true
+        unitTests.isReturnDefaultValues = true
     }
 
     buildFeatures {
@@ -177,6 +178,12 @@ dependencies {
     // WorkManager (low stock checks)
     implementation("androidx.work:work-runtime-ktx:2.10.0")
 
+    // Networking
+    implementation("io.ktor:ktor-client-android:2.3.12")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
+    implementation("io.ktor:ktor-client-logging:2.3.12")
+
     // Notifications
     implementation("androidx.core:core-ktx:1.15.0")
 
@@ -184,6 +191,8 @@ dependencies {
     testImplementation("com.google.truth:truth:1.4.4")
     testImplementation("org.robolectric:robolectric:4.14")
     testImplementation("androidx.test:core-ktx:1.6.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
+    testImplementation("io.ktor:ktor-client-mock:2.3.12")
     androidTestImplementation("com.google.dagger:hilt-android-testing:2.55")
     kspAndroidTest("com.google.dagger:hilt-compiler:2.55")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

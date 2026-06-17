@@ -101,4 +101,12 @@
     <string name="next_dose_warning_prefix">Warning: Your next dose is not due for another %s. Taking it now may exceed your recommended dosage.</string>
 
     <string name="none">None</string>
+
+    <!-- Permissions -->
+    <string name="exact_alarm_permission_title">High-Precision Reminders</string>
+    <string name="exact_alarm_permission_text">To ensure your medication reminders arrive at the exact time, MedTracker needs permission to schedule exact alarms. Please enable this in the system settings.</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="not_now">Not Now</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
 </resources>

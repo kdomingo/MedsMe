@@ -3,6 +3,7 @@ package com.domtech.medtracker.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import com.domtech.medtracker.ui.components.MedTrackerScaffold
 import androidx.compose.runtime.Composable
@@ -55,6 +58,7 @@ fun EditMedicationScreen(
     val vm: EditMedicationViewModel = hiltViewModel()
 
     val uiState by vm.uiState.collectAsStateWithLifecycle()
+    val suggestions by vm.suggestions.collectAsStateWithLifecycle()
     val existing = uiState.existing
 
     var name by remember { mutableStateOf("") }
@@ -76,6 +80,7 @@ fun EditMedicationScreen(
     LaunchedEffect(existing?.id) {
         val e = existing ?: return@LaunchedEffect
         name = e.name
+        vm.onNameChange(e.name)
         doseAmount = e.doseAmount.toString()
         doseUnit = e.doseUnit
         frequency = e.frequency
@@ -99,13 +104,60 @@ fun EditMedicationScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text(stringResource(R.string.name)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { 
+                        name = it 
+                        vm.onNameChange(it)
+                    },
+                    label = { Text(stringResource(R.string.name)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+
+                if (suggestions.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        suggestions.forEach { suggestion ->
+                            SuggestionChip(
+                                onClick = {
+                                    name = suggestion.name
+                                    vm.onNameChange(suggestion.name)
+                                    suggestion.doseAmount?.let { doseAmount = it.toString() }
+                                    doseUnit = suggestion.doseUnit
+                                    suggestion.frequencyHint?.let { frequency = it }
+                                    suggestion.dailyIntervalHint?.let { dailyInterval = it.toString() }
+                                    suggestion.hourlyIntervalHint?.let { hourlyInterval = it.toString() }
+                                    
+                                    val suggestedNotes = listOfNotNull(suggestion.usageNote, suggestion.warning)
+                                        .joinToString(". ")
+                                    if (suggestedNotes.isNotBlank()) {
+                                        notes = suggestedNotes
+                                    }
+                                },
+                                label = { 
+                                    val displayName = if (suggestion.genericName != null && suggestion.genericName != suggestion.name) {
+                                        "${suggestion.name} (${suggestion.genericName})"
+                                    } else {
+                                        suggestion.name
+                                    }
+                                    val label = if (suggestion.doseAmount != null) {
+                                        "$displayName ${suggestion.doseAmount} ${suggestion.doseUnit}"
+                                    } else {
+                                        displayName
+                                    }
+                                    Text(label) 
+                                }
+                            )
+                        }
+                    }
+                }
+            }
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(

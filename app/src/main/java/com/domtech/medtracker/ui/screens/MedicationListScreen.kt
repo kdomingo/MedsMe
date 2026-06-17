@@ -38,9 +38,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,35 +81,32 @@ fun MedicationListScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            Column {
-                TopAppBar(title = { Text(stringResource(R.string.medications)) })
-                SearchBar(
-                    inputField = {
-                        SearchBarDefaults.InputField(
-                            query = uiState.searchQuery,
-                            onQueryChange = { vm.onSearchQueryChange(it) },
-                            onSearch = { },
-                            expanded = false,
-                            onExpandedChange = { },
-                            placeholder = { Text(stringResource(R.string.search_medications)) },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                            trailingIcon = {
-                                if (uiState.searchQuery.isNotEmpty()) {
-                                    IconButton(onClick = { vm.onSearchQueryChange("") }) {
-                                        Icon(Icons.Default.Clear, contentDescription = null)
-                                    }
+            SearchBar(
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = uiState.searchQuery,
+                        onQueryChange = { vm.onSearchQueryChange(it) },
+                        onSearch = { },
+                        expanded = false,
+                        onExpandedChange = { },
+                        placeholder = { Text(stringResource(R.string.search_medications)) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        trailingIcon = {
+                            if (uiState.searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { vm.onSearchQueryChange("") }) {
+                                    Icon(Icons.Default.Clear, contentDescription = null)
                                 }
-                            },
-                        )
-                    },
-                    expanded = false,
-                    onExpandedChange = { },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    content = { }
-                )
-            }
+                            }
+                        },
+                    )
+                },
+                expanded = false,
+                onExpandedChange = { },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                content = { }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAdd) {
@@ -245,53 +244,94 @@ private fun MedicationRow(
         label = "barColor",
     )
 
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(medColor.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Medication,
+                        contentDescription = null,
+                        tint = medColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                
+                Spacer(Modifier.width(12.dp))
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = med.name,
-                        style = MaterialTheme.typography.titleMedium.copy(color = medColor),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${FormatUtils.formatFrequency(context, med)} • Level: ${FormatUtils.formatDose(med.currentLevel, med.doseUnit)}",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = FormatUtils.formatFrequency(context, med),
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                
                 if (low) {
-                    Text(
-                        text = stringResource(R.string.low_stock),
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.error,
-                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.low_stock),
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
+            
             Row(verticalAlignment = Alignment.CenterVertically) {
-                LevelBar(
-                    fraction = fraction,
-                    color = barColor,
-                    modifier = Modifier.weight(1f)
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Text(
+                            text = stringResource(R.string.current_level, FormatUtils.formatDose(med.currentLevel, med.doseUnit)),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    LevelBar(
+                        fraction = fraction,
+                        color = barColor,
+                    )
+                }
                 Spacer(Modifier.width(16.dp))
                 Button(
                     onClick = onTake,
-                    contentPadding = PaddingValues(horizontal = 12.dp),
-                    modifier = Modifier.height(32.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    modifier = Modifier.height(36.dp)
                 ) {
-                    Text(stringResource(R.string.take), style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.take), style = MaterialTheme.typography.labelLarge)
                 }
             }
         }

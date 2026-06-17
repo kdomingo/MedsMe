@@ -9,13 +9,17 @@ import com.domtech.medtracker.data.IntakeEventEntity
 import com.domtech.medtracker.data.IntakeReminderEntity
 import com.domtech.medtracker.data.MedRepository
 import com.domtech.medtracker.data.MedicationEntity
+import com.domtech.medtracker.domain.models.MedicationSuggestion
+import com.domtech.medtracker.domain.repository.SuggestionRepository
 import com.domtech.medtracker.reminders.ReminderScheduler
 import com.domtech.medtracker.ui.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -142,6 +146,7 @@ data class EditMedicationUiState(
 @HiltViewModel
 class EditMedicationViewModel @Inject constructor(
     private val repo: MedRepository,
+    private val suggestionRepo: SuggestionRepository,
     private val scheduler: ReminderScheduler,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -151,6 +156,21 @@ class EditMedicationViewModel @Inject constructor(
     val uiState: StateFlow<EditMedicationUiState> = (medId?.let { repo.observeMed(it) } ?: flowOf(null))
         .map { EditMedicationUiState(existing = it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EditMedicationUiState(isLoading = medId != null))
+
+    private val _nameInput = MutableStateFlow("")
+    val nameInput: StateFlow<String> = _nameInput
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val suggestions: StateFlow<List<MedicationSuggestion>> = _nameInput
+        .flatMapLatest { query ->
+            if (query.length < 2) flowOf(emptyList())
+            else flowOf(suggestionRepo.getSuggestions(query))
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun onNameChange(newName: String) {
+        _nameInput.value = newName
+    }
 
     fun save(
         name: String,
