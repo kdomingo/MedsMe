@@ -107,6 +107,15 @@
     <string name="exact_alarm_permission_text">To ensure your medication reminders arrive at the exact time, MedTracker needs permission to schedule exact alarms. Please enable this in the system settings.</string>
     <string name="open_settings">Open Settings</string>
     <string name="not_now">Not Now</string>
+    <!-- Info Screens -->
+    <string name="credits">Credits</string>
+    <string name="credits_content">MedTracker was built with love and care. Special thanks to the Android developer community and the open-source libraries that made this project possible.\n\nIcons by Material Icons.\nData provided by NIH RxTerms API.</string>
+    <string name="terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="terms_content">By using MedTracker, you agree to take full responsibility for your medication management. This app is a tool and not a substitute for professional medical advice. Always consult with your doctor before making changes to your medication routine.</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_content">Your privacy is important to us. MedTracker stores all medication data locally on your device. We do not collect, share, or sell your personal health information to third parties.</string>
+
     <string name="show_more">Show more</string>
     <string name="show_less">Show less</string>
+    <string name="menu">Menu</string>
 </resources>
