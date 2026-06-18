@@ -147,11 +147,14 @@ tasks.configureEach {
     // Rename .aab files after they are generated
     if (name.startsWith("bundle") && !name.contains("Test")) {
         val variantName = name.removePrefix("bundle").replaceFirstChar { it.lowercase() }
+        val bundleDirProvider = layout.buildDirectory.dir("outputs/bundle/$variantName")
+        val rootDir = rootProject.rootDir
+        
         doLast {
-            val versionProps = loadVersionProps(rootProject.rootDir)
+            val versionProps = loadVersionProps(rootDir)
             val vName = versionNameFrom(versionProps)
             val vCode = versionCodeFrom(versionProps)
-            val bundleDir = File(project.layout.buildDirectory.asFile.get(), "outputs/bundle/$variantName")
+            val bundleDir = bundleDirProvider.get().asFile
             val bundleFile = File(bundleDir, "app-$variantName.aab")
             if (bundleFile.exists()) {
                 val newFile = File(bundleDir, "MedsMe-$variantName-v${vName}(${vCode}).aab")
