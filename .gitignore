@@ -242,5 +242,6 @@ fabric.properties
 
 # Project specific
 *.salive
+docs/screenshots/
 
 # End of https://www.toptal.com/developers/gitignore/api/android,androidstudio,gradle,kotlin,macos
