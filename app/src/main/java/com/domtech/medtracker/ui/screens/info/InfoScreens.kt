@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.domtech.medtracker.R
-import com.domtech.medtracker.ui.components.MedTrackerScaffold
+import com.domtech.medtracker.ui.components.MedsMeScaffold
 
 @Composable
 fun InfoScreen(
@@ -19,7 +19,7 @@ fun InfoScreen(
     content: String,
     onBack: () -> Unit
 ) {
-    MedTrackerScaffold(
+    MedsMeScaffold(
         title = title,
         onBack = onBack
     ) { padding ->

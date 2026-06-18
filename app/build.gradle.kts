@@ -42,9 +42,20 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../keystore/medsme-release.jks")
+            storePassword = "MedsMePass123!"
+            keyAlias = "medsme-alias"
+            keyPassword = "MedsMePass123!"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -92,10 +103,9 @@ androidComponents {
         val vCode = versionCodeFrom(versionProps)
 
         variant.outputs.forEach { output ->
-            // Example: MedTracker-staging-v1.2.3(45).apk
             val out = output as? com.android.build.api.variant.impl.VariantOutputImpl
             if (out != null) {
-                out.outputFileName = "MedTracker-${variant.name}-v${vName}(${vCode}).apk"
+                out.outputFileName = "MedsMe-${variant.name}-v${vName}(${vCode}).apk"
             }
         }
     }
@@ -176,7 +186,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.7.0")
     ksp("androidx.room:room-compiler:2.7.0")
 
-    // WorkManager (low stock checks)
+    // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     // Networking
@@ -184,9 +194,6 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
     implementation("io.ktor:ktor-client-logging:2.3.12")
-
-    // Notifications
-    implementation("androidx.core:core-ktx:1.15.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.google.truth:truth:1.4.4")
@@ -203,4 +210,3 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
-

@@ -27,7 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
-import com.domtech.medtracker.ui.components.MedTrackerScaffold
+import com.domtech.medtracker.ui.components.MedsMeScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -92,7 +92,7 @@ fun EditMedicationScreen(
         colorArgb = e.colorArgb
     }
 
-    MedTrackerScaffold(
+    MedsMeScaffold(
         title = stringResource(if (existing == null) R.string.add_medication else R.string.edit_medication),
         onBack = onDone,
         modifier = modifier,

@@ -59,7 +59,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun MedTrackerTheme(
+fun MedsMeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false, // Disabled to enforce the Green/Red medical theme
     content: @Composable () -> Unit
