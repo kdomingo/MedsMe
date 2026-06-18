@@ -1,4 +1,4 @@
-# MedTracker (Android)
+# MedsMe (Android)
 
 Medication tracking app built with:
 

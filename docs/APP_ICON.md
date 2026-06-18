@@ -1,4 +1,4 @@
-# MedTracker app icon
+# MedsMe app icon
 
 ## Concept
 
