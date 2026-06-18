@@ -17,7 +17,7 @@ import com.domtech.medtracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MedTrackerScaffold(
+fun MedsMeScaffold(
     title: String,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,

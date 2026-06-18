@@ -245,3 +245,5 @@ fabric.properties
 docs/screenshots/
 
 # End of https://www.toptal.com/developers/gitignore/api/android,androidstudio,gradle,kotlin,macos
+\nkeystore/
+signing-credentials.txt

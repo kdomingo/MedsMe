@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
-class MedTrackerApplication : Application(), Configuration.Provider {
+class MedsMeApplication : Application(), Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
     override val workManagerConfiguration: Configuration

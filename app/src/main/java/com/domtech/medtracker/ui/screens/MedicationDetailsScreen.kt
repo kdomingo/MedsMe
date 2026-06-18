@@ -40,7 +40,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import com.domtech.medtracker.ui.components.MedTrackerScaffold
+import com.domtech.medtracker.ui.components.MedsMeScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -97,7 +97,7 @@ fun MedicationDetailsScreen(
     val m = med
     val medColor = if (m != null) Color(m.colorArgb) else MaterialTheme.colorScheme.primary
 
-    MedTrackerScaffold(
+    MedsMeScaffold(
         title = m?.name ?: stringResource(R.string.medication),
         onBack = onBack,
         actions = {
@@ -139,7 +139,7 @@ fun MedicationDetailsScreen(
             Column(modifier = Modifier.padding(padding).padding(16.dp)) {
                 Text(stringResource(R.string.not_found))
             }
-            return@MedTrackerScaffold
+            return@MedsMeScaffold
         }
 
         Column(
