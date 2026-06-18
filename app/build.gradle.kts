@@ -105,8 +105,9 @@ val incrementVersionCode by tasks.registering {
     group = "versioning"
     description = "Increment VERSION_CODE in version.properties"
 
+    val propsFile = rootProject.file("version.properties")
     doLast {
-        val f = File(rootProject.rootDir, "version.properties")
+        val f = propsFile
         val props = Properties()
         if (f.exists()) {
             f.inputStream().use(props::load)
@@ -119,7 +120,7 @@ val incrementVersionCode by tasks.registering {
         f.outputStream().use { out ->
             props.store(out, "Auto-updated by Gradle")
         }
-        logger.lifecycle("Bumped VERSION_CODE: $current -> ${current + 1}")
+        println("Bumped VERSION_CODE: $current -> ${current + 1}")
     }
 }
 
