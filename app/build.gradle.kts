@@ -148,16 +148,20 @@ tasks.configureEach {
     if (name.startsWith("bundle") && !name.contains("Test")) {
         val variantName = name.removePrefix("bundle").replaceFirstChar { it.lowercase() }
         val bundleDirProvider = layout.buildDirectory.dir("outputs/bundle/$variantName")
-        val rootDir = rootProject.rootDir
+        val propsFile = rootProject.file("version.properties")
         
         doLast {
-            val versionProps = loadVersionProps(rootDir)
-            val vName = versionNameFrom(versionProps)
-            val vCode = versionCodeFrom(versionProps)
-            val bundleDir = bundleDirProvider.get().asFile
-            val bundleFile = File(bundleDir, "app-$variantName.aab")
+            val props = java.util.Properties()
+            if (propsFile.exists()) {
+                propsFile.inputStream().use(props::load)
+            }
+            val vName = props.getProperty("VERSION_NAME") ?: "1.0.0"
+            val vCode = props.getProperty("VERSION_CODE") ?: "1"
+            
+            val dir = bundleDirProvider.get().asFile
+            val bundleFile = File(dir, "app-$variantName.aab")
             if (bundleFile.exists()) {
-                val newFile = File(bundleDir, "MedsMe-$variantName-v${vName}(${vCode}).aab")
+                val newFile = File(dir, "MedsMe-$variantName-v${vName}(${vCode}).aab")
                 bundleFile.renameTo(newFile)
                 println("Bundle renamed to: ${newFile.name}")
             }
