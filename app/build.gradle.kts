@@ -134,13 +134,31 @@ val incrementVersionCode by tasks.registering {
     }
 }
 
-// Auto-increment when producing installable artifacts for staging/release.
+// Auto-increment and rename artifacts when producing installable files for staging/release.
 tasks.configureEach {
     val n = name.lowercase()
     val isAssembleOrBundle = n.startsWith("assemble") || n.startsWith("bundle")
     val isStagingOrRelease = n.contains("staging") || n.contains("release")
+    
     if (isAssembleOrBundle && isStagingOrRelease) {
         dependsOn(incrementVersionCode)
+    }
+
+    // Rename .aab files after they are generated
+    if (name.startsWith("bundle") && !name.contains("Test")) {
+        val variantName = name.removePrefix("bundle").replaceFirstChar { it.lowercase() }
+        doLast {
+            val versionProps = loadVersionProps(rootProject.rootDir)
+            val vName = versionNameFrom(versionProps)
+            val vCode = versionCodeFrom(versionProps)
+            val bundleDir = File(project.layout.buildDirectory.asFile.get(), "outputs/bundle/$variantName")
+            val bundleFile = File(bundleDir, "app-$variantName.aab")
+            if (bundleFile.exists()) {
+                val newFile = File(bundleDir, "MedsMe-$variantName-v${vName}(${vCode}).aab")
+                bundleFile.renameTo(newFile)
+                println("Bundle renamed to: ${newFile.name}")
+            }
+        }
     }
 }
 
