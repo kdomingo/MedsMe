@@ -151,9 +151,9 @@ tasks.configureEach {
         val propsFile = rootProject.file("version.properties")
         
         doLast {
-            val props = java.util.Properties()
+            val props = Properties()
             if (propsFile.exists()) {
-                propsFile.inputStream().use(props::load)
+                propsFile.inputStream().use { props.load(it) }
             }
             val vName = props.getProperty("VERSION_NAME") ?: "1.0.0"
             val vCode = props.getProperty("VERSION_CODE") ?: "1"
